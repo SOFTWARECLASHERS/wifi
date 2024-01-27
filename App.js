@@ -3,13 +3,13 @@ import { ActivityIndicator, Alert, Button, FlatList, StyleSheet, Text, TextInput
 import 'expo-dev-client';
 import WifiManager from "react-native-wifi-reborn";
 import { useEffect, useState } from 'react';
-
 export default function App() {
   const [ssid, setSSID] = useState('');
   const [password, setPassword] = useState('');
   const [recNetworks, setrecNetworks] = useState([])
   const [wifiList, setWifiList] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [selectedWifi, setSelectedWifi] = useState('');
   // Fetch and update the list of available WiFi networks
   const fetchWifiList = async () => {
@@ -28,7 +28,6 @@ export default function App() {
       Alert.alert("Declined!");
       console.log(err);
     }
-
   };
   useEffect(() => {
     setSSID(selectedWifi);
@@ -39,17 +38,15 @@ export default function App() {
       const isWep = false;
       console.log(ssids, pwd)
       const isHidden = false;
-      console.log(selectedWifi.secure);
-      try {
-        await WifiManager.connectToProtectedSSID(ssids, password, isWep, isHidden).catch(() => {
-          Alert.alert("Something Went Wrong!!!");
-        });
-        console.log('Connected successfully!');
-        Alert.alert('Connected successfully!');
-      } catch (error) {
-        Alert.alert('Failed to Connect!', error);
-        console.error('Error connecting to WiFi:', error);
-      }
+        await WifiManager.connectToProtectedSSID(ssids, password, isWep,isHidden).then(
+          () => {
+            console.log("Connected successfully!");
+          },
+          () => {
+            console.log("Connection failed!");
+          }
+        );
+       
     }
   };
   const selectedWifiFunc = (data) => {
@@ -99,14 +96,14 @@ export default function App() {
           placeholder="Enter SSID"
           value={ssid}
           onChangeText={text => setSSID(text)}
-          style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: 240, borderRadius:4,}}
+          style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: 240, borderRadius: 4, }}
         />
         <TextInput
           placeholder="Enter Password"
           value={password}
           onChangeText={text => setPassword(text)}
           secureTextEntry
-          style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: 240, borderRadius:4,  }}
+          style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: 240, borderRadius: 4, }}
         />
         <View style={{ marginBottom: 10, width: 120, overflow: 'hidden' }}>
           {/* <Button title="Connect" onPress={handleConnect} /> */}
