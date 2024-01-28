@@ -1,5 +1,3 @@
-
-
 import 'expo-dev-client';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -11,9 +9,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Scanned" component={MainScan} />
-        <Stack.Screen name="ScannedDetails" component={Scaned} />
+        <Stack.Screen name="Home" component={Home}/>
+        <Stack.Screen name="Scanned" component={MainScan} options={{ title: 'Scanned Devices' }} />
+        <Stack.Screen name="ScannedDetails" component={Scaned} options={{ title: 'Manage' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

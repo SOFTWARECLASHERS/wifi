@@ -3,16 +3,37 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import WifiManager from "react-native-wifi-reborn";
 import { StatusBar } from 'expo-status-bar';
+import { companyName, companyNameSize } from '../config/config';
 const MainScan = () => {
   const [selectedWifi, setSelectedWifi] = useState('');
   const route = useRoute();
   const { networks } = route.params;
   const [ssid, setSSID] = useState('');
   const [password, setPassword] = useState('');
-  const [recNetworks, setrecNetworks] = useState([])
-  const [wifiList, setWifiList] = useState([]);
-  const [loading, setLoading] = useState(false);
+
   const navigation = useNavigation();
+
+  const [isChecked, setIsChecked] = useState(false);
+  const saveDataArray = async (datas) => {
+    try {
+      const dataWithPassword = {
+        password: password,
+        datas: datas.SSID
+      };
+      // Convert the array to a string using JSON.stringify
+      const dataArrayString = JSON.stringify(datas);
+
+      // Save the data array string with a specific key
+      await AsyncStorage.setItem('dataKey', dataArrayString);
+
+      console.log('Data array saved successfully!');
+    } catch (error) {
+      console.error('Error saving data array:', error);
+    }
+  };
+  const toggleCheckbox = () => {
+    setIsChecked(!isChecked);
+  };
   const selectedWifiFunc = (data) => {
     console.log("Ssid:", data);
     setSelectedWifi(data);
@@ -27,12 +48,17 @@ const MainScan = () => {
       await WifiManager.connectToProtectedSSID(ssids, password, isWep, isHidden).then(
         () => {
           console.log("Connected successfully!");
-          navigation.navigate("ScannedDetails");
+          if (isChecked === true) {
+            saveDataArray(ssids);
+          } else {
+            navigation.navigate("ScannedDetails");
+          }
         },
         () => {
           console.log("Connection failed!");
         }
       );
+
     }
   };
   const inputRef = useRef();
@@ -40,6 +66,8 @@ const MainScan = () => {
     setSSID(selectedWifi);
   }, [selectedWifi])
   const [wifis, setWifis] = useState(networks);
+
+
   const renderList = ({ item, index }) => {
     return (
       <>
@@ -68,6 +96,15 @@ const MainScan = () => {
   return (
     <View style={{ flex: 1, marginTop: 100, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
       <StatusBar style='auto' />
+      <Text style={{ fontSize: companyNameSize, fontWeight: '400', marginBottom: 40 }}>{companyName}</Text>
+      <TextInput
+        placeholder="SSID"
+        value={ssid}
+        onChangeText={text => setSSID(text)}
+        autoFocus={false}
+        editable={false}
+        style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: 240, borderRadius: 4, }}
+      />
       <TextInput
         placeholder="Enter Password"
         value={password}
@@ -77,6 +114,22 @@ const MainScan = () => {
         ref={inputRef}
         style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: 240, borderRadius: 4, }}
       />
+      {/* 
+      <TouchableOpacity
+        style={styles.checkbox}
+        onPress={toggleCheckbox}
+      >
+        {isChecked ? (
+          <>
+            <Text>PASSWORD WILL BE SAVED</Text>
+          </>
+        ) : (
+          <>
+            <Text>PASSWORD WILL NOT BE SAVED</Text>
+          </>
+        )}
+      </TouchableOpacity> */}
+      <Text>{isChecked ? true : false}</Text>
       {selectedWifi.length > 0 &&
         <TouchableOpacity onPress={() => connectToWifi(ssid, password)} style={{ width: 220, margin: 20, height: 70, backgroundColor: "#000", borderRadius: 30, padding: 20, alignItems: "center" }}>
           <Text style={{ fontSize: 20, color: "#fff", fontWeight: "bold" }}>Connect</Text>
@@ -84,8 +137,7 @@ const MainScan = () => {
       }
       <FlatList
         data={wifis}
-        keyExtractor={item => item.bssid}
-        key={item => item.bssid}
+        keyExtractor={item => item.BSSID}
         renderItem={renderList}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -110,6 +162,16 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#000",
     borderRadius: 20,
+  },
+  checkbox: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 10,
+    borderWidth: 0.9,
+    borderColor: "black",
+    padding: 20,
+    borderRadius: 30,
+    width: 'auto',
   },
   text: {
     color: "#fff",
